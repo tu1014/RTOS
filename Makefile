@@ -34,15 +34,15 @@ all: $(navilos)
 clean:
 	@rm -fr build
 
-# qemu execute commad
+# run
 run: $(navilos)
 	qemu-system-arm -M realview-pb-a8 -kernel $(navilos)
 
-# gdb-multiarch
+# run debug mode
 debug: $(navilos)
 	qemu-system-arm -M realview-pb-a8 -kernel $(navilos) -S -gdb tcp::1234,ipv4
 
-# arm-none-eabi-gdb
+# run gdb-multiarch
 gdb:
 	gdb-multiarch
 
