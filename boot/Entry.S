@@ -26,48 +26,49 @@
 		data_abt_handler_addr:  .word dummy_handler
 		irq_handler_addr:		.word dummy_handler
 		fiq_handler_addr:		.word dummy_handler
-    
+
     vector_end:
 		LDR		R0, =0x10000000
 		LDR		R1, [R0]
 
+
     reset_handler:
-		; SVC Mode Stack Init
+        /* SVC Mode Stack Init */
 		MRS r0, cpsr
         BIC r1, r0, #ARM_MODE_BIT_FLAG
         ORR r1, r1, #ARM_MODE_BIT_SVC
         MSR cpsr, r1
         LDR sp, =SVC_STACK_TOP
 
-		; IRQ Mode Stack Init
+		/* IRQ Mode Stack Init */
         MRS r0, cpsr
         BIC r1, r0, #ARM_MODE_BIT_FLAG
         ORR r1, r1, #ARM_MODE_BIT_IRQ
         MSR cpsr, r1
         LDR sp, =IRQ_STACK_TOP
 
-		; FIQ Mode Stack Init
+		/* FIQ Mode Stack Init */
         MRS r0, cpsr
         BIC r1, r0, #ARM_MODE_BIT_FLAG
         ORR r1, r1, #ARM_MODE_BIT_FIQ
         MSR cpsr, r1
         LDR sp, =FIQ_STACK_TOP
 
-		; ABT Mode Stack Init
+		/* ABT Mode Stack Init */
         MRS r0, cpsr
         BIC r1, r0, #ARM_MODE_BIT_FLAG
         ORR r1, r1, #ARM_MODE_BIT_ABT
         MSR cpsr, r1
         LDR sp, =ABT_STACK_TOP
 
-		; UND Mode Stack Init
+		/* UND Mode Stack Init */
         MRS r0, cpsr
         BIC r1, r0, #ARM_MODE_BIT_FLAG
         ORR r1, r1, #ARM_MODE_BIT_UND
         MSR cpsr, r1
         LDR sp, =UND_STACK_TOP
 
-		; USR, SYS Mode Stack Init
+		/* USR, SYS Mode Stack Init */
         MRS r0, cpsr
         BIC r1, r0, #ARM_MODE_BIT_FLAG
         ORR r1, r1, #ARM_MODE_BIT_SYS
