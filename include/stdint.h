@@ -19,6 +19,8 @@
 #ifndef _STDINT_H
 #define _STDINT_H	1
 
+#define NULL    ((void*)0)
+
 /* Exact integral types.  */
 
 /* Signed.  */
@@ -299,7 +301,5 @@ typedef unsigned long long int	uintmax_t;
 #  define INTMAX_C(c)	c ## LL
 #  define UINTMAX_C(c)	c ## ULL
 # endif
-
-#define NULL    ((void*)0)
 
 #endif /* stdint.h */

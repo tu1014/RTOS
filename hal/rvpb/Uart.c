@@ -1,14 +1,29 @@
 
 #include "Uart.h"
 #include "HalUart.h"
+#include "HalInterrupt.h"
 
 extern volatile PL011_t* Uart;
 
+static void interrupt_handler(void)
+{
+    uint8_t ch = Hal_uart_get_char();
+    Hal_uart_put_char(ch);
+}
+
 void Hal_uart_init(void) {
+    // enable UART
     Uart->uartcr.bits.UARTEN = 0;
     Uart->uartcr.bits.TXE = 1; // enable uart output
     Uart->uartcr.bits.RXE - 1; // enable uart input
     Uart->uartcr.bits.UARTEN = 1;
+
+    // enable input interrupt
+    Uart->uartimsc.bits.RXIM = 1;
+
+    // register UART interrupt handler
+    Hal_interrupt_enable(UART_INTERRUPT0);
+    Hal_interrupt_register_handler(interrupt_handler, UART_INTERRUPT0);
 }
 
 void Hal_uart_put_char(uint8_t ch) {
