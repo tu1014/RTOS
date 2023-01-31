@@ -5,11 +5,7 @@
 
 extern volatile PL011_t* Uart;
 
-static void interrupt_handler(void)
-{
-    uint8_t ch = Hal_uart_get_char();
-    Hal_uart_put_char(ch);
-}
+static void interrupt_handler(void);
 
 void Hal_uart_init(void) {
     // enable UART
@@ -35,7 +31,7 @@ uint8_t Hal_uart_get_char(void) {
 
     uint8_t data;
 
-    while(Uart->uartfr.bits.RXFE);
+    while(Uart->uartfr.bits.RXFE); // wait until input buffer is filled
 
     data = Uart->uartdr.all;
 
@@ -48,4 +44,10 @@ uint8_t Hal_uart_get_char(void) {
     }
 
     return (uint8_t)(data & 0xFF);
+}
+
+static void interrupt_handler(void)
+{
+    uint8_t ch = Hal_uart_get_char();
+    Hal_uart_put_char(ch);
 }
