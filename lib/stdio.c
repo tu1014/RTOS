@@ -12,7 +12,8 @@ uint32_t putstr(const char* s) {
     uint32_t count = 0;
 
     while(*s) {
-        Hal_uart_put_char(*s++);
+        Hal_uart_put_char((*s));
+        s++;
         count++;
     }
 
