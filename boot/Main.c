@@ -7,6 +7,7 @@
 #include "stdlib.h"
 #include "stdbool.h"
 #include "task.h"
+#include "Kernel.h"
 
 static void Hw_init(void);
 static void Printf_test(void);
@@ -21,14 +22,14 @@ void main(void) {
 
     Hw_init();
 
-    // putstr("Hello World!\n");
+    putstr("Hello World!\n");
     // putstr("This is UART test.\n");
-    Printf_test();
+    // Printf_test();
     // putstr("Finish!\n");
 
     // Timer_test();
 
-    while(true);
+    Kernel_init();
 }
 
 static void Hw_init(void) {
@@ -78,19 +79,47 @@ static Kernel_init(void) {
     if(taskId == NOT_ENOUGH_TASK_NUM)
         putstr("TASK2 creation fail\n");
 
+    Kernel_start();
 }
 
 void User_task0(void) {
-    debug_printf("User Task #0\n");
-    while(true);
+
+    uint32_t local = 0;
+    uint32_t count = 0;
+
+    debug_printf("User Task #%u start!\n", local);
+    while(true) {
+        debug_printf("User Task #%u SP = 0x%x\n",local, &local);
+        debug_printf("User Task #%u COUNT : %u\n", local, count++);
+        delay(1000);
+        Kernel_yield();
+    }
 }
 
 void User_task1(void) {
-    debug_printf("User Task #1\n");
-    while(true);
+
+    uint32_t local = 1;
+    uint32_t count = 0;
+
+    debug_printf("User Task #%u start!\n", local);
+    while(true) {
+        debug_printf("User Task #%u SP = 0x%x\n",local, &local);
+        debug_printf("User Task #%u COUNT : %u\n", local, count++);
+        delay(1000);
+        Kernel_yield();
+    }
 }
 
 void User_task2(void) {
-    debug_printf("User Task #2\n");
-    while(true);
+
+    uint32_t local = 2;
+    uint32_t count = 0;
+
+    debug_printf("User Task #%u start!\n", local);
+    while(true) {
+        debug_printf("User Task #%u SP = 0x%x\n",local, &local);
+        debug_printf("User Task #%u COUNT : %u\n", local, count++);
+        delay(1000);
+        Kernel_yield();
+    }
 }
