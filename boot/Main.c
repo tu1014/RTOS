@@ -8,6 +8,7 @@
 #include "stdbool.h"
 #include "task.h"
 #include "Kernel.h"
+#include "event.h"
 
 static void Hw_init(void);
 static void Printf_test(void);
@@ -22,12 +23,7 @@ void main(void) {
 
     Hw_init();
 
-    putstr("Hello World!\n");
-    // putstr("This is UART test.\n");
-    // Printf_test();
-    // putstr("Finish!\n");
-
-    // Timer_test();
+    putstr("This is Navilos RTOS!\n");
 
     Kernel_init();
 }
@@ -66,6 +62,7 @@ static Kernel_init(void) {
     uint32_t taskId;
 
     Kernel_task_init();
+    Kernel_event_flag_init();
 
     taskId = Kernel_task_create(User_task0);
     if(taskId == NOT_ENOUGH_TASK_NUM)
@@ -89,9 +86,33 @@ void User_task0(void) {
 
     debug_printf("User Task #%u start!\n", local);
     while(true) {
-        debug_printf("User Task #%u SP = 0x%x\n",local, &local);
-        debug_printf("User Task #%u COUNT : %u\n", local, count++);
-        delay(1000);
+        // debug_printf("User Task #%u SP = 0x%x\n",local, &local);
+        // debug_printf("User Task #%u COUNT : %u\n", local, count++);
+        // delay(1000);
+
+        bool pendingEvent = true;
+
+        while(pendingEvent) {
+            
+            KernelEventFlag_t handle_event = Kernel_wait_events(
+                KernelEventFlag_UartIn | KernelEventFlag_CmdOut
+            );
+
+            switch(handle_event) {
+                case KernelEventFlag_UartIn:
+                    debug_printf("=====UARTIn Event Handled!=====\n");
+                    break;
+
+                case KernelEventFlag_CmdOut:
+                    debug_printf("CmdOut Event by Task#%u\n", local);
+                    break;
+                
+                case KernelEventFlag_Empty:
+                    pendingEvent = false;
+                    break;
+            }
+        }
+    
         Kernel_yield();
     }
 }
@@ -103,9 +124,18 @@ void User_task1(void) {
 
     debug_printf("User Task #%u start!\n", local);
     while(true) {
-        debug_printf("User Task #%u SP = 0x%x\n",local, &local);
-        debug_printf("User Task #%u COUNT : %u\n", local, count++);
-        delay(1000);
+        // debug_printf("User Task #%u SP = 0x%x\n",local, &local);
+        // debug_printf("User Task #%u COUNT : %u\n", local, count++);
+        // delay(1000);
+
+        KernelEventFlag_t handle_event = Kernel_wait_events(KernelEventFlag_CmdIn);
+
+        switch(handle_event) {
+            case KernelEventFlag_CmdIn:
+                debug_printf("====CmdIn Event Handled====\n");
+                break;
+        }
+
         Kernel_yield();
     }
 }
@@ -117,9 +147,9 @@ void User_task2(void) {
 
     debug_printf("User Task #%u start!\n", local);
     while(true) {
-        debug_printf("User Task #%u SP = 0x%x\n",local, &local);
-        debug_printf("User Task #%u COUNT : %u\n", local, count++);
-        delay(1000);
+        // debug_printf("User Task #%u SP = 0x%x\n",local, &local);
+        // debug_printf("User Task #%u COUNT : %u\n", local, count++);
+        // delay(1000);
         Kernel_yield();
     }
 }
