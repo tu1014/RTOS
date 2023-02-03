@@ -57,7 +57,7 @@ static void Timer_test(void) {
     }
 }
 
-static Kernel_init(void) {
+static void Kernel_init(void) {
 
     uint32_t taskId;
 
@@ -85,7 +85,7 @@ void User_task0(void) {
     uint32_t count = 0;
 
     debug_printf("User Task #%u start!\n", local);
-    while(true) {
+    /*while(true) {
         // debug_printf("User Task #%u SP = 0x%x\n",local, &local);
         // debug_printf("User Task #%u COUNT : %u\n", local, count++);
         // delay(1000);
@@ -114,6 +114,60 @@ void User_task0(void) {
         }
     
         Kernel_yield();
+    }*/
+
+    uint8_t cmdBuf[16];
+    uint32_t cmdBufIndex = 0;
+    uint8_t uartch = 0;
+
+    while(true) {
+        KernelEventFlag_t handle_event = Kernel_wait_events(
+            KernelEventFlag_UartIn | KernelEventFlag_CmdOut
+        );
+
+        switch(handle_event) {
+
+            case KernelEventFlag_UartIn:
+                Kernel_recv_msg(KernelMsgQ_Task0, &uartch, 1);
+                // debug_printf("%c", uartch);
+                if(uartch == '\r') {
+                    cmdBuf[cmdBufIndex] = '\0';
+
+                    while(true) {
+
+                        Kernel_send_events(KernelEventFlag_CmdIn);
+
+                        if(Kernel_send_msg(KernelMsgQ_Task1, &cmdBufIndex, 1) == false)
+                            Kernel_yield();
+
+                        else if(Kernel_send_msg(KernelMsgQ_Task1, cmdBuf, cmdBufIndex) == false) {
+                            uint8_t rollback;
+                            Kernel_recv_msg(KernelMsgQ_Task1, &rollback, 1);
+                            Kernel_yield();
+                        }
+
+                        else {
+                            break;
+                        }
+                    }
+
+                    cmdBufIndex = 0;
+                }
+
+                else {
+                    // TODO: Overflow Exception Handle
+                    cmdBuf[cmdBufIndex] = uartch;
+                    cmdBufIndex++;
+                    cmdBufIndex %= 16;
+                }
+
+                break;
+
+            case KernelEventFlag_CmdOut:
+                debug_printf("CmdOut Event Handled by Task0\n");
+                break;
+        }
+        Kernel_yield();
     }
 }
 
@@ -123,7 +177,7 @@ void User_task1(void) {
     uint32_t count = 0;
 
     debug_printf("User Task #%u start!\n", local);
-    while(true) {
+    /*while(true) {
         // debug_printf("User Task #%u SP = 0x%x\n",local, &local);
         // debug_printf("User Task #%u COUNT : %u\n", local, count++);
         // delay(1000);
@@ -133,6 +187,27 @@ void User_task1(void) {
         switch(handle_event) {
             case KernelEventFlag_CmdIn:
                 debug_printf("====CmdIn Event Handled====\n");
+                break;
+        }
+
+        Kernel_yield();
+    }*/
+
+    uint8_t cmdlen = 0;
+    uint8_t cmd[16] = {0};
+
+    while(true) {
+
+        KernelEventFlag_t handle_event = Kernel_wait_events(
+            KernelEventFlag_CmdIn
+        );
+
+        switch(handle_event) {
+            case KernelEventFlag_CmdIn:
+                memclr(cmd, 16);
+                Kernel_recv_msg(KernelMsgQ_Task1, &cmdlen, 1);
+                Kernel_recv_msg(KernelMsgQ_Task1, cmd, cmdlen);
+                debug_printf("Task1 Received CMD : %s\n", cmd);
                 break;
         }
 
