@@ -52,15 +52,28 @@ uint8_t Hal_uart_get_char(void) {
 static void interrupt_handler(void)
 {
     uint8_t ch = Hal_uart_get_char();
-    Hal_uart_put_char(ch);
-    // Hal_uart_put_char('\n');
 
-    /*Kernel_send_events(KernelEventFlag_UartIn | KernelEventFlag_CmdIn);
+    if(ch != 'X') {
+        Hal_uart_put_char(ch);
+        // Hal_uart_put_char('\n');
 
-    if(ch == 'X') {
+        /*Kernel_send_events(KernelEventFlag_UartIn | KernelEventFlag_CmdIn);
+
+        if(ch == 'X') {
+            Kernel_send_events(KernelEventFlag_CmdOut);
+        }*/
+
+        Kernel_send_msg(KernelMsgQ_Task0, &ch, 1);
+        Kernel_send_events(KernelEventFlag_UartIn);
+    }
+
+    else if(ch == 'U') {
+        Kernel_send_events(KernelEventFlag_Unlock);
+    }
+
+    else {
+
         Kernel_send_events(KernelEventFlag_CmdOut);
-    }*/
 
-    Kernel_send_msg(KernelMsgQ_Task0, &ch, 1);
-    Kernel_send_events(KernelEventFlag_UartIn);
+    }
 }
